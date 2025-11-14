@@ -140,8 +140,16 @@ export default function SkillIconsBlock({ block, onUpdate }) {
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={selectedIcons} strategy={horizontalListSortingStrategy}>
+<<<<<<< Updated upstream
               <div className="flex flex-wrap gap-2 p-3 bg-background rounded border min-h-[60px]">
 
+=======
+              <div 
+              className="flex flex-wrap gap-2 p-3 bg-background rounded border min-h-[60px]"
+              onDragOver={(e)=> e.stopPropagation()}
+              onDrop={(e)=>e.stopPropagation()}
+              >
+>>>>>>> Stashed changes
                 {selectedIcons.map((icon) => (
                   <SortableIcon key={icon} icon={icon} onRemove={handleRemoveIcon} />
                 ))}
