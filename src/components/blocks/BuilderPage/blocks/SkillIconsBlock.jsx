@@ -141,6 +141,7 @@ export default function SkillIconsBlock({ block, onUpdate }) {
           >
             <SortableContext items={selectedIcons} strategy={horizontalListSortingStrategy}>
               <div className="flex flex-wrap gap-2 p-3 bg-background rounded border min-h-[60px]">
+
                 {selectedIcons.map((icon) => (
                   <SortableIcon key={icon} icon={icon} onRemove={handleRemoveIcon} />
                 ))}

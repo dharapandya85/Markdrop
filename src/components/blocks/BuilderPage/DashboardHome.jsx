@@ -20,6 +20,29 @@ export default function DashboardHome({
               onBlockUpdate={onBlockUpdate}
               onBlockDelete={onBlockDelete}
               onBlockAdd={onBlockAdd}
+              />
+            </div>
+          )}
+      ref={dropZoneRef}
+      className={`w-full h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-sm overflow-hidden ${
+      isDraggingFile ? "bg-muted/40 border-dashed border-2 border-primary" : ""
+    }`}
+      onDragOver={(e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect= "copy";
+        setIsDraggingFile(true);
+      }}
+      onDragLeave={handleDragLeave} 
+      onDrop={handleDrop}
+    >
+    {activeTab === "editor" && (
+        <div className="w-full h-full">
+        <Editor
+          blocks={blocks}
+          onBlockUpdate={onBlockUpdate}
+          onBlockDelete={onBlockDelete}
+          onBlockAdd={onBlockAdd}
             />
           </div>
         )}
