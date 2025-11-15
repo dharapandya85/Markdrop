@@ -51,4 +51,8 @@ return(
     </FileContext.Provider>
 );
 };
+<<<<<<< HEAD
 export const useFiles=()=> useContext(FileContext);
+=======
+export const useFiles=()=> useContext(FileContext);
+>>>>>>> main

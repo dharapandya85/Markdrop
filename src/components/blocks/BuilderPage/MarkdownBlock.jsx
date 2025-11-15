@@ -5,6 +5,7 @@ import { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import BlockquoteBlock from "./blocks/BlockquoteBlock";
 import CodeBlock from "./blocks/CodeBlock";
+import GithubProfileCardsBlock from "./blocks/GithubProfileCardsBlock";
 import HeadingBlock from "./blocks/HeadingBlock";
 
 import ImageBlock from "./blocks/ImageBlock";
@@ -15,38 +16,17 @@ import SeparatorBlock from "./blocks/SeparatorBlock";
 import ShieldBadgeBlock from "./blocks/ShieldBadgeBlock";
 import SkillIconsBlock from "./blocks/SkillIconsBlock";
 import TableBlock from "./blocks/TableBlock";
+import TypingSvgBlock from "./blocks/TypingSvgBlock";
 import VideoBlock from "./blocks/VideoBlock";
 
-const MarkdownBlock = memo(function MarkdownBlock({
-  block,
-  onUpdate,
-  onDelete,
-  onBlockAdd,
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+const MarkdownBlock = memo(function MarkdownBlock({ block, onUpdate, onDelete, onBlockAdd }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: block.id,
   });
 
   const handleDelete = useCallback(() => {
     onDelete(block.id);
   }, [onDelete, block.id]);
-
-  const handleDoubleClick = useCallback(
-    (e) => {
-      // Prevent event bubbling to parent
-      e.stopPropagation();
-      // Add a new block after this one
-      onBlockAdd(block.id);
-    },
-    [onBlockAdd, block.id]
-  );
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -83,6 +63,10 @@ const MarkdownBlock = memo(function MarkdownBlock({
         return <ShieldBadgeBlock block={block} onUpdate={onUpdate} />;
       case "skill-icons":
         return <SkillIconsBlock block={block} onUpdate={onUpdate} />;
+      case "typing-svg":
+        return <TypingSvgBlock block={block} onUpdate={onUpdate} />;
+      case "github-profile-cards":
+        return <GithubProfileCardsBlock block={block} onUpdate={onUpdate} />;
       default:
         if (listTypes.includes(block.type)) {
           return <ListBlock block={block} onUpdate={onUpdate} />;
@@ -96,7 +80,6 @@ const MarkdownBlock = memo(function MarkdownBlock({
       <div
         ref={setNodeRef}
         style={style}
-        onDoubleClick={handleDoubleClick}
         className="group relative rounded-lg border border-transparent hover:border-muted-foreground/20 transition-all p-3 touch-manipulation"
       >
         {/* Controls - always visible on mobile, hover on desktop */}

@@ -130,20 +130,10 @@ const blocksToMarkdown = (blocks) => {
 
                 const needsRepo =
                   githubBadges.includes(badge.type) ||
-                  [
-                    "codecov",
-                    "coveralls",
-                    "travis-ci",
-                    "github-actions",
-                  ].includes(badge.type);
+                  ["codecov", "coveralls", "travis-ci", "github-actions"].includes(badge.type);
                 const needsPackage =
                   devMetrics.includes(badge.type) &&
-                  ![
-                    "codecov",
-                    "coveralls",
-                    "travis-ci",
-                    "github-actions",
-                  ].includes(badge.type);
+                  !["codecov", "coveralls", "travis-ci", "github-actions"].includes(badge.type);
                 const needsUsername = socialBadges.includes(badge.type);
 
                 return (
@@ -354,6 +344,83 @@ const blocksToMarkdown = (blocks) => {
           }
           return markdown;
         }
+        case "typing-svg": {
+          const lines = block.lines || ["Hi there! I'm a developer 👋"];
+          const font = block.font || "Fira Code";
+          const size = block.size || "28";
+          const duration = block.duration || "3000";
+          const pause = block.pause || "1000";
+          const color = block.color || "00FFB3";
+          const center = block.center !== false;
+          const vCenter = block.vCenter !== false;
+          const width = block.width || "900";
+          const height = block.height || "80";
+
+          const baseUrl = "https://readme-typing-svg.herokuapp.com";
+          const params = new URLSearchParams();
+
+          params.append("font", font);
+          params.append("size", size);
+          params.append("duration", duration);
+          params.append("pause", pause);
+          params.append("color", color.replace("#", ""));
+          params.append("center", center.toString());
+          params.append("vCenter", vCenter.toString());
+          params.append("width", width);
+          params.append("height", height);
+
+          // Join lines with semicolon separator as a single parameter
+          const filteredLines = lines.filter((line) => line.trim() !== "");
+          if (filteredLines.length > 0) {
+            params.append("lines", filteredLines.join(";"));
+          }
+
+          const typingSvgUrl = `${baseUrl}?${params.toString()}`;
+          return `![Typing SVG](${typingSvgUrl})`;
+        }
+        case "github-profile-cards": {
+          const username = block.username || "";
+          const cards = block.cards || [];
+          const align = block.align || "left";
+
+          if (!username.trim() || cards.length === 0) {
+            return "";
+          }
+
+          const baseUrl = "http://github-profile-summary-cards.vercel.app/api/cards";
+
+          const cardMarkdown = cards
+            .map((card) => {
+              let url = `${baseUrl}/${card.cardType}?username=${username}&theme=${card.theme}`;
+
+              // Add utcOffset only for productive-time card
+              if (card.cardType === "productive-time") {
+                url += `&utcOffset=${card.utcOffset}`;
+              }
+
+              // Use HTML img tag if height or width is specified
+              if (card.height || card.width) {
+                const attributes = [];
+                if (card.height) attributes.push(`height="${card.height}"`);
+                if (card.width) attributes.push(`width="${card.width}"`);
+                return `<img ${attributes.join(" ")} src="${url}" />`;
+              }
+
+              return `![GitHub ${card.cardType}](${url})`;
+            })
+            .join(" ");
+
+          // Apply alignment
+          if (align === "center") {
+            return `<div align="center">\n\n  ${cardMarkdown}\n\n</div>`;
+          } else if (align === "right") {
+            return `<div align="right">\n\n  ${cardMarkdown}\n\n</div>`;
+          } else if (align === "left") {
+            return `<div align="left">\n\n  ${cardMarkdown}\n\n</div>`;
+          }
+
+          return cardMarkdown;
+        }
         default:
           return block.content;
       }
@@ -372,9 +439,7 @@ const markdownToBlocks = (markdown) => {
   let inHtmlBlock = false;
 
   const generateUniqueId = () => {
-    return `${Date.now()}-${blockCounter++}-${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    return `${Date.now()}-${blockCounter++}-${Math.random().toString(36).substr(2, 9)}`;
   };
 
   for (let i = 0; i < lines.length; i++) {
@@ -392,13 +457,10 @@ const markdownToBlocks = (markdown) => {
       if (line.trim() === "</div>") {
         // Parse the HTML block content
         const htmlContent = htmlBlockContent.join("\n");
-        const align =
-          htmlContent.match(/align=["'](center|left|right)["']/)?.[1] || "left";
+        const align = htmlContent.match(/align=["'](center|left|right)["']/)?.[1] || "left";
 
         // Check if it contains a video element
-        const videoMatch = htmlContent.match(
-          /<video src=\s*["']([^"']+)["']\s*\/>/
-        );
+        const videoMatch = htmlContent.match(/<video src=\s*["']([^"']+)["']\s*\/>/);
         if (videoMatch) {
           const videoUrl = videoMatch[1];
           const titleMatch = htmlContent.match(/<h3>([^<]+)<\/h3>/);
@@ -512,8 +574,7 @@ const markdownToBlocks = (markdown) => {
     // Handle code blocks
     if (line.startsWith("```")) {
       if (inCodeBlock) {
-        const language =
-          codeBlockContent[0]?.replace("```", "").trim() || "plaintext";
+        const language = codeBlockContent[0]?.replace("```", "").trim() || "plaintext";
         const code = codeBlockContent.slice(1).join("\n");
         blocks.push({
           id: generateUniqueId(),

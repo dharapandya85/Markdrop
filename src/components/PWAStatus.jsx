@@ -1,24 +1,25 @@
+import { Download01Icon } from "hugeicons-react";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export function PWAStatus() {
+  const location = useLocation();
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
-    // Check if app is already installed
     if (window.matchMedia("(display-mode: standalone)").matches) {
       setIsInstalled(true);
     }
 
-    // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallable(true);
     };
 
-    // Listen for app installed event
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setIsInstallable(false);
@@ -46,32 +47,37 @@ export function PWAStatus() {
     }
   };
 
-  // Don't show anything if already installed
-  if (isInstalled) {
-    return null;
-  }
+  if (isInstalled) return null;
 
-  // Show install button if installable
-  if (isInstallable) {
+  if (isInstallable && location.pathname === "/") {
     return (
-      <div className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-        <div className="flex items-center gap-2">
-          <span className="text-sm">Install Markdrop</span>
-          <button
-            onClick={handleInstallClick}
-            className="bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded text-sm transition-colors"
-          >
-            Install
-          </button>
-        </div>
-      </div>
+      <>
+        <Button
+          onClick={handleInstallClick}
+          size="sm"
+          variant="default"
+          className="hidden sm:flex fixed bottom-4 right-4 shadow-lg z-50 gap-2"
+        >
+          <Download01Icon size={16} />
+          Install Markdrop
+        </Button>
+
+        <Button
+          onClick={handleInstallClick}
+          size="icon"
+          variant="default"
+          className="flex sm:hidden fixed bottom-4 left-4 shadow-lg z-50"
+          title="Install Markdrop"
+        >
+          <Download01Icon size={20} />
+        </Button>
+      </>
     );
   }
 
   return null;
 }
 
-// Service Worker registration status (for development)
 export function SWStatus() {
   const [swStatus, setSWStatus] = useState("checking");
 
@@ -85,10 +91,7 @@ export function SWStatus() {
     }
   }, []);
 
-  // Only show in development
-  if (process.env.NODE_ENV !== "development") {
-    return null;
-  }
+  if (process.env.NODE_ENV !== "development") return null;
 
   const statusColors = {
     checking: "bg-yellow-500",
@@ -97,18 +100,16 @@ export function SWStatus() {
     "not-supported": "bg-gray-500",
   };
 
-  const statusTexts = {
-    checking: "SW: Checking...",
-    ready: "SW: Ready",
-    error: "SW: Error",
-    "not-supported": "SW: Not Supported",
+  const statusTitles = {
+    checking: "Service Worker: Checking...",
+    ready: "Service Worker: Ready",
+    error: "Service Worker: Error",
+    "not-supported": "Service Worker: Not Supported",
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
-      <div className={`${statusColors[swStatus]} text-white px-2 py-1 rounded text-xs`}>
-        {statusTexts[swStatus]}
-      </div>
+    <div className="fixed bottom-4 left-4 z-50" title={statusTitles[swStatus]}>
+      <div className={`${statusColors[swStatus]} w-4 h-4 rounded-full`} />
     </div>
   );
 }

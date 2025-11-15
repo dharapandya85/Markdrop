@@ -34,4 +34,8 @@ export default function FileTabs() {
             </button>
         </div>
     );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

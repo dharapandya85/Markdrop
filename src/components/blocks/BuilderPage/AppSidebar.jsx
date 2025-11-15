@@ -1,10 +1,7 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import {
-  BarChart3,
-  CheckSquare,
   Code2,
-  FileText,
-  Github,
+  CreditCard,
   Heading1,
   Heading2,
   Heading3,
@@ -21,8 +18,8 @@ import {
   Shield,
   Sparkles,
   Table,
+  Type,
   List as UnorderedList,
-  Users,
   Video,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -40,15 +37,9 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-function DraggableItem({
-  id,
-  title,
-  icon: Icon,
-  isCollapsed,
-  isMobile,
-  onDoubleClick,
-}) {
+function DraggableItem({ id, title, icon: Icon, isCollapsed, isMobile, onDoubleClick }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id,
   });
@@ -63,7 +54,7 @@ function DraggableItem({
     onDoubleClick(id);
   };
 
-  return (
+  const itemContent = (
     <div
       ref={setNodeRef}
       {...listeners}
@@ -73,16 +64,26 @@ function DraggableItem({
       style={{
         opacity: isDragging ? 0.5 : 1,
       }}
-      title={
-        showText
-          ? `Drag or double-click to add ${title}`
-          : `Double-click to add ${title}`
-      }
     >
       <Icon className="w-4 h-4 shrink-0 text-muted-foreground" />
       {showText && <span className="text-sm">{title}</span>}
     </div>
   );
+
+  // If collapsed (showing only icons), wrap with tooltip
+  if (!showText) {
+    return (
+      <Tooltip delayDuration={200}>
+        <TooltipTrigger asChild>{itemContent}</TooltipTrigger>
+        <TooltipContent side="right" className="text-xs">
+          <p>{title}</p>
+          <p className="text-muted-foreground text-[10px]">Drag or double-click to add</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return itemContent;
 }
 
 export default function AppSidebar({ onBlockAdd, ...props }) {
@@ -111,10 +112,11 @@ export default function AppSidebar({ onBlockAdd, ...props }) {
       image: "",
       video: "",
       link: "",
-      table:
-        "| Header 1 | Header 2 |\n|----------|----------|\n| Add text..   | Add text..   |",
+      table: "| Header 1 | Header 2 |\n|----------|----------|\n| Add text..   | Add text..   |",
       "shield-badge": "",
       "skill-icons": "",
+      "typing-svg": "",
+      "github-profile-cards": "",
     };
 
     const newBlock = {
@@ -140,6 +142,31 @@ export default function AppSidebar({ onBlockAdd, ...props }) {
         icons: "js,html,css",
         theme: "dark",
         perLine: "15",
+      }),
+      ...(blockType === "typing-svg" && {
+        lines: ["Hi there! I'm a developer 👋"],
+        font: "Fira Code",
+        size: "28",
+        duration: "3000",
+        pause: "1000",
+        color: "00FFB3",
+        center: true,
+        vCenter: true,
+        width: "900",
+        height: "80",
+      }),
+      ...(blockType === "github-profile-cards" && {
+        username: "",
+        align: "left",
+        cards: [
+          {
+            cardType: "profile-details",
+            theme: "material_palenight",
+            utcOffset: "8",
+            height: "",
+            width: "",
+          },
+        ],
       }),
     };
 
@@ -188,9 +215,11 @@ export default function AppSidebar({ onBlockAdd, ...props }) {
       { title: "Video", key: "video", icon: Video },
     ],
     links: [{ title: "Link", key: "link", icon: Link2 }],
-    badges: [
+    "special blocks": [
       { title: "Shield Badge", key: "shield-badge", icon: Shield },
       { title: "Skill Icons", key: "skill-icons", icon: Sparkles },
+      { title: "Typing SVG", key: "typing-svg", icon: Type },
+      { title: "GitHub Profile Cards", key: "github-profile-cards", icon: CreditCard },
     ],
   };
 
@@ -226,35 +255,37 @@ export default function AppSidebar({ onBlockAdd, ...props }) {
 
       <SidebarContent>
         <ScrollArea className="h-full">
-          <div className="space-y-4 py-2">
-            {Object.entries(data).map(([section, items], i, arr) => (
-              <div key={section}>
-                {showFullContent && (
-                  <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
-                    {section}
-                  </div>
-                )}
+          <TooltipProvider>
+            <div className="space-y-4 py-2">
+              {Object.entries(data).map(([section, items], i, arr) => (
+                <div key={section}>
+                  {showFullContent && (
+                    <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                      {section}
+                    </div>
+                  )}
 
-                {items.map((item) => (
-                  <DraggableItem
-                    key={item.key}
-                    id={item.key}
-                    title={item.title}
-                    icon={item.icon}
-                    isCollapsed={isCollapsed}
-                    isMobile={isMobile}
-                    onDoubleClick={handleDoubleClickAdd}
-                  />
-                ))}
+                  {items.map((item) => (
+                    <DraggableItem
+                      key={item.key}
+                      id={item.key}
+                      title={item.title}
+                      icon={item.icon}
+                      isCollapsed={isCollapsed}
+                      isMobile={isMobile}
+                      onDoubleClick={handleDoubleClickAdd}
+                    />
+                  ))}
 
-                {!showFullContent && i < arr.length - 1 && (
-                  <div className="px-3">
-                    <Separator className="my-2 opacity-40" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  {!showFullContent && i < arr.length - 1 && (
+                    <div className="px-3">
+                      <Separator className="my-2 opacity-40" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </TooltipProvider>
         </ScrollArea>
       </SidebarContent>
 

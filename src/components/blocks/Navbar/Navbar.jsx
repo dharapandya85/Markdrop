@@ -1,4 +1,16 @@
-import { Home, Info, LogIn, LogOut, Menu, Moon, Sun, User, UserPlus, Wrench } from "lucide-react";
+import {
+  FileText,
+  Home,
+  Info,
+  LogIn,
+  LogOut,
+  Menu,
+  Moon,
+  Sun,
+  User,
+  UserPlus,
+  Wrench,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import markdropLogoDark from "@/assets/markdrop_logo_dark.svg";
@@ -16,15 +28,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NAV_LINKS } from "@/config/nav";
 import { useAuth } from "@/context/AuthContext";
+import { useThemeTransition } from "@/hooks/useThemeTransition";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
+  const { applyCircleExpand } = useThemeTransition();
   const { user, logout, loading } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
 
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    applyCircleExpand(() => setTheme(theme === "dark" ? "light" : "dark"));
   };
 
   const handleLogout = async () => {
@@ -59,6 +73,8 @@ export default function Navbar() {
         return <Home className="h-4 w-4 mr-2" />;
       case "/builder":
         return <Wrench className="h-4 w-4 mr-2" />;
+      case "/templates":
+        return <FileText className="h-4 w-4 mr-2" />;
       case "/about":
         return <Info className="h-4 w-4 mr-2" />;
       default:
@@ -74,7 +90,7 @@ export default function Navbar() {
           <img
             src={theme === "dark" ? markdropLogoDark : markdropLogoLight}
             alt="Markdrop Logo"
-            className="h-6 md:h-8 w-auto flex-shrink-0 object-contain cursor-pointer"
+            className="h-6 md:h-8 w-auto shrink-0 object-contain cursor-pointer"
           />
         </Link>
 
@@ -140,7 +156,7 @@ export default function Navbar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild className="lg:hidden">
-            <button className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors flex-shrink-0">
+            <button className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors shrink-0">
               <Menu className="h-4 w-4" />
             </button>
           </DropdownMenuTrigger>
